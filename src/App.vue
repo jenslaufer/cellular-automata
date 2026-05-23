@@ -1,7 +1,9 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { useAutomaton } from "./composables/useAutomaton.js";
+import { WOLFRAM_CLASSES } from "./composables/useWolframClasses.js";
 import AutomatonCanvas from "./components/AutomatonCanvas.vue";
+import ClassFilter from "./components/ClassFilter.vue";
 import RulePreview from "./components/RulePreview.vue";
 
 const { rule, width, generations, initialMode, compute } = useAutomaton(30, 201, 200);
@@ -31,6 +33,8 @@ const ruleInput = computed({
     if (Number.isFinite(n)) rule.value = Math.max(0, Math.min(255, Math.floor(n)));
   },
 });
+
+const selectedClassId = ref(null);
 </script>
 
 <template>
@@ -62,17 +66,22 @@ const ruleInput = computed({
           />
         </div>
 
+        <ClassFilter :rule="rule" @select="selectedClassId = $event" />
+
         <div class="flex flex-wrap gap-2">
           <button
             v-for="p in presets"
             :key="p.id"
             @click="rule = p.id"
             class="text-xs px-3 py-1 rounded border transition"
-            :class="
+            :class="[
               rule === p.id
                 ? 'bg-white text-black border-white'
-                : 'border-neutral-700 text-neutral-300 hover:border-neutral-500'
-            "
+                : 'border-neutral-700 text-neutral-300 hover:border-neutral-500',
+              selectedClassId !== null && !WOLFRAM_CLASSES.find(c => c.id === selectedClassId)?.rules.includes(p.id)
+                ? 'opacity-50'
+                : '',
+            ]"
           >
             {{ p.label }}
           </button>
