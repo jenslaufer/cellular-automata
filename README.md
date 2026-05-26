@@ -29,3 +29,11 @@ npm run build    # production build → dist/
 Rule 30 (chaos), 90 (Sierpinski), 110 (Turing-complete), 184 (traffic), 54 (class IV), 150 (XOR).
 
 Slider covers the full 0–255 space. Initial conditions: single center cell, random row, or left-edge seed.
+
+## Fractals
+
+A second tab renders three classical fractals on Canvas 2D, all deterministic snapshots (no animation loop, no GPU):
+
+- **Mandelbrot set** — escape-time render with HSL palette (`hue = 360 · i / maxIter`), points inside the set drawn black. Presets: Default, Seahorse Valley, Elephant Valley.
+- **Sierpinski (chaos game)** — seeded `mulberry32` RNG drives the chaos game for deterministic output. Variants: Triangle, Carpet, Vicsek.
+- **Koch snowflake** — iterative segment expansion (axiom `F++F++F`, rule `F → F-F++F-F`, 60° angle). Depth selectable 1–6.
