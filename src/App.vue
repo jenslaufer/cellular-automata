@@ -1,153 +1,36 @@
 <script setup>
-import { computed, ref, watch } from "vue";
-import { useAutomaton } from "./composables/useAutomaton.js";
-import { WOLFRAM_CLASSES } from "./composables/useWolframClasses.js";
-import AutomatonCanvas from "./components/AutomatonCanvas.vue";
-import ClassFilter from "./components/ClassFilter.vue";
-import RulePreview from "./components/RulePreview.vue";
+import { ref } from "vue";
+import AutomataView from "./views/AutomataView.vue";
+import FractalsView from "./views/FractalsView.vue";
 
-const { rule, width, generations, initialMode, compute } = useAutomaton(30, 201, 200);
-const cellSize = ref(4);
+const activeTab = ref("automata");
 
-const grid = ref(compute());
-
-function regenerate() {
-  grid.value = compute();
-}
-
-watch([rule, width, generations, initialMode], regenerate);
-
-const presets = [
-  { id: 30, label: "Rule 30 — Chaos" },
-  { id: 90, label: "Rule 90 — Sierpinski" },
-  { id: 110, label: "Rule 110 — Turing-complete" },
-  { id: 184, label: "Rule 184 — Traffic" },
-  { id: 54, label: "Rule 54 — Class IV" },
-  { id: 150, label: "Rule 150 — XOR" },
+const tabs = [
+  { id: "automata", label: "Cellular Automata" },
+  { id: "fractals", label: "Fractals" },
 ];
-
-const ruleInput = computed({
-  get: () => rule.value,
-  set: (v) => {
-    const n = Number(v);
-    if (Number.isFinite(n)) rule.value = Math.max(0, Math.min(255, Math.floor(n)));
-  },
-});
-
-const selectedClassId = ref(null);
 </script>
 
 <template>
   <div class="min-h-screen px-6 py-8 max-w-6xl mx-auto">
     <header class="mb-8">
-      <h1 class="text-3xl font-semibold tracking-tight">Cellular Automata</h1>
-      <p class="text-neutral-400 mt-1 text-sm">
-        Elementary 1D cellular automata (Wolfram), 256 rules. Time flows downward.
-      </p>
+      <h1 class="text-3xl font-semibold tracking-tight">Mathematical Visualisations</h1>
+      <nav class="flex gap-1 mt-4 border-b border-neutral-800">
+        <button
+          v-for="tab in tabs"
+          :key="tab.id"
+          @click="activeTab = tab.id"
+          class="px-4 py-2 text-sm transition border-b-2 -mb-px"
+          :class="activeTab === tab.id
+            ? 'border-white text-white'
+            : 'border-transparent text-neutral-400 hover:text-neutral-200'"
+        >
+          {{ tab.label }}
+        </button>
+      </nav>
     </header>
 
-    <section class="grid md:grid-cols-[1fr_auto] gap-8 items-start">
-      <div class="space-y-6">
-        <div class="flex flex-wrap items-center gap-3">
-          <label class="text-sm text-neutral-300">Rule</label>
-          <input
-            v-model="ruleInput"
-            type="number"
-            min="0"
-            max="255"
-            class="w-20 bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white"
-          />
-          <input
-            v-model.number="rule"
-            type="range"
-            min="0"
-            max="255"
-            class="flex-1 min-w-[200px]"
-          />
-        </div>
-
-        <ClassFilter :rule="rule" @select="selectedClassId = $event" />
-
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="p in presets"
-            :key="p.id"
-            @click="rule = p.id"
-            class="text-xs px-3 py-1 rounded border transition"
-            :class="[
-              rule === p.id
-                ? 'bg-white text-black border-white'
-                : 'border-neutral-700 text-neutral-300 hover:border-neutral-500',
-              selectedClassId !== null && !WOLFRAM_CLASSES.find(c => c.id === selectedClassId)?.rules.includes(p.id)
-                ? 'opacity-50'
-                : '',
-            ]"
-          >
-            {{ p.label }}
-          </button>
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-          <div>
-            <label class="block text-neutral-400 mb-1">Width</label>
-            <input
-              v-model.number="width"
-              type="number"
-              min="11"
-              max="801"
-              step="2"
-              class="w-full bg-neutral-900 border border-neutral-700 rounded px-2 py-1"
-            />
-          </div>
-          <div>
-            <label class="block text-neutral-400 mb-1">Generations</label>
-            <input
-              v-model.number="generations"
-              type="number"
-              min="10"
-              max="800"
-              class="w-full bg-neutral-900 border border-neutral-700 rounded px-2 py-1"
-            />
-          </div>
-          <div>
-            <label class="block text-neutral-400 mb-1">Cell size</label>
-            <input
-              v-model.number="cellSize"
-              type="number"
-              min="1"
-              max="20"
-              class="w-full bg-neutral-900 border border-neutral-700 rounded px-2 py-1"
-            />
-          </div>
-          <div>
-            <label class="block text-neutral-400 mb-1">Initial</label>
-            <select
-              v-model="initialMode"
-              class="w-full bg-neutral-900 border border-neutral-700 rounded px-2 py-1"
-            >
-              <option value="single">Single cell</option>
-              <option value="random">Random</option>
-              <option value="left">Left edge</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-2">
-        <div class="text-xs text-neutral-400 uppercase tracking-wider">
-          Rule {{ rule }} pattern
-        </div>
-        <RulePreview :rule="rule" />
-      </div>
-    </section>
-
-    <section class="mt-8">
-      <AutomatonCanvas :grid="grid" :cell-size="cellSize" />
-    </section>
-
-    <footer class="mt-10 text-xs text-neutral-500">
-      Each row is one time step. Each cell's next state depends on itself and its two
-      neighbors via the chosen rule (Wolfram code 0–255). Edges wrap toroidally.
-    </footer>
+    <AutomataView v-if="activeTab === 'automata'" />
+    <FractalsView v-if="activeTab === 'fractals'" />
   </div>
 </template>
