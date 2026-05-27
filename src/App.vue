@@ -2,10 +2,12 @@
 import { computed, ref } from "vue";
 import AutomataView from "./views/AutomataView.vue";
 import FractalsView from "./views/FractalsView.vue";
+import FluidFlowView from "./views/FluidFlowView.vue";
 
 const tabs = [
   { id: "automata", label: "Cellular Automata", component: AutomataView },
   { id: "fractals", label: "Fractals", component: FractalsView },
+  { id: "fluid", label: "Fluid Flow", component: FluidFlowView },
 ];
 
 const activeTab = ref("automata");
